@@ -1,0 +1,3 @@
+-- Dados locais opcionais e repetíveis entram aqui.
+-- O arquivo fica vazio por padrão porque os registros da aplicação pertencem
+-- a usuários do Supabase Auth.
