@@ -1,9 +1,8 @@
 import { brl, dia, hoje } from '@/lib/campos'
 import { listarCustosEquinos, listarEquinos } from '@/lib/dados'
-import { CATEGORIAS_CUSTO_EQUINO } from '@/lib/equinos'
-import { criarCustoEquinos } from '../../actions'
 import { Excluir, Vazio } from '../../componentes'
 import { LinkTabela } from '../../nav'
+import { FormularioCustoEquinos } from './formulario'
 
 export default async function CustosEquinos() {
   const [equinos, custos] = await Promise.all([listarEquinos(), listarCustosEquinos()])
@@ -37,25 +36,7 @@ export default async function CustosEquinos() {
           {!disponiveis.length ? (
             <Vazio titulo="Nenhum equino ativo." dica="Cadastre um equino antes de lançar despesas." />
           ) : (
-            <form action={criarCustoEquinos} className="linha">
-              <fieldset className="selecao-equinos">
-                <legend>Equinos envolvidos</legend>
-                <div className="grade-selecao-equinos">
-                  {disponiveis.map((e: any) => (
-                    <label className="check-equino" key={e.id}>
-                      <input type="checkbox" name="equino_ids" value={e.id} />
-                      <span><strong>{e.nome}</strong><small>{e.funcao_reprodutiva}</small></span>
-                    </label>
-                  ))}
-                </div>
-              </fieldset>
-              <label>Categoria<input name="categoria" list="categorias-custo-equino" required /></label>
-              <datalist id="categorias-custo-equino">{CATEGORIAS_CUSTO_EQUINO.map((x) => <option key={x} value={x} />)}</datalist>
-              <label>Data<input name="data" type="date" required defaultValue={hoje()} /></label>
-              <label>Valor total (R$)<input name="valor" type="number" min="0.01" step="0.01" required /></label>
-              <label className="larga">Descrição<input name="descricao" placeholder="Ex.: compra de ração do mês" /></label>
-              <button>Lançar despesa</button>
-            </form>
+            <FormularioCustoEquinos equinos={disponiveis} data={hoje()} />
           )}
         </div>
       </div>
