@@ -86,7 +86,7 @@ Custo: R$ 0 nos planos grátis dos dois. Só passa disso com mais de 500 MB de b
   - agenda de vacinas, exames, ferrageamento e prazo de comunicação de nascimento;
   - galeria privada de fotos, com legenda e escolha da foto de capa;
   - central de custos para ração, veterinário, medicamentos e outras despesas,
-    com lançamento individual ou rateio entre vários equinos;
+    com lançamento individual ou rateio entre alguns ou todos os equinos ativos;
   - custos por animal e por ciclo reprodutivo, documentos privados e histórico completo.
 - **Ração** — independente dos lotes, serve para todos:
   - **Ingredientes**: nome e observações. O preço não fica aqui — fica em cada

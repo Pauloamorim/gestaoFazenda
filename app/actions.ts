@@ -536,15 +536,21 @@ export async function criarCustoEquino(fd: FormData) {
 }
 
 export async function criarCustoEquinos(fd: FormData) {
-  const equino_ids = [
+  let equino_ids = [
     ...new Set(
       fd
         .getAll('equino_ids')
         .map((id) => texto(id))
-        .filter((id): id is string => Boolean(id)),
+      .filter((id): id is string => Boolean(id)),
     ),
   ]
-  if (!equino_ids.length) throw new Error('Selecione pelo menos um equino.')
+
+  const sb = await db()
+  if (!equino_ids.length) {
+    const ativos = ok(await sb.from('equinos').select('id').eq('situacao', 'Ativo'))
+    equino_ids = ativos.map((equino) => equino.id)
+  }
+  if (!equino_ids.length) throw new Error('Não há equinos ativos para receber esta despesa.')
 
   const valorTotal = numeroObrigatorio(fd.get('valor'), 'Valor total')
   const categoria = obrigatorio(fd.get('categoria'), 'Categoria')
@@ -559,7 +565,6 @@ export async function criarCustoEquinos(fd: FormData) {
     valor: valores[indice],
   }))
 
-  const sb = await db()
   ok(await sb.from('custos_equinos').insert(lancamentos))
   revalidatePath('/equinos', 'layout')
   revalidatePath('/equinos/custos')

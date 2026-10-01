@@ -359,21 +359,13 @@ form.linha > button {
 .check-equino small {
   color: var(--fraco);
 }
-.selecao-pendente,
 .selecao-confirmada {
   display: block;
   margin-top: 8px;
   font-size: 12px;
 }
-.selecao-pendente {
-  color: var(--terra);
-}
 .selecao-confirmada {
   color: var(--curral);
-}
-form.linha > button:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
 }
 
 label {

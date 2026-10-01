@@ -26,13 +26,7 @@ export function FormularioCustoEquinos({
   }
 
   return (
-    <form
-      action={criarCustoEquinos}
-      className="linha"
-      onSubmit={(evento) => {
-        if (!selecionados.length) evento.preventDefault()
-      }}
-    >
+    <form action={criarCustoEquinos} className="linha">
       <fieldset className="selecao-equinos">
         <legend>Equinos envolvidos</legend>
         <div className="grade-selecao-equinos">
@@ -49,10 +43,10 @@ export function FormularioCustoEquinos({
             </label>
           ))}
         </div>
-        <small className={selecionados.length ? 'selecao-confirmada' : 'selecao-pendente'}>
+        <small className="selecao-confirmada">
           {selecionados.length
             ? `${selecionados.length} equino${selecionados.length > 1 ? 's' : ''} selecionado${selecionados.length > 1 ? 's' : ''}.`
-            : 'Selecione pelo menos um equino para lançar a despesa.'}
+            : `Nenhum selecionado: o valor será dividido entre todos os ${equinos.length} equinos ativos.`}
         </small>
       </fieldset>
       <label>Categoria<input name="categoria" list="categorias-custo-equino" required /></label>
@@ -60,7 +54,7 @@ export function FormularioCustoEquinos({
       <label>Data<input name="data" type="date" required defaultValue={data} /></label>
       <label>Valor total (R$)<input name="valor" type="number" min="0.01" step="0.01" required /></label>
       <label className="larga">Descrição<input name="descricao" placeholder="Ex.: compra de ração do mês" /></label>
-      <button disabled={!selecionados.length}>Lançar despesa</button>
+      <button>Lançar despesa</button>
     </form>
   )
 }

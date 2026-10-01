@@ -30,7 +30,7 @@ export default async function CustosEquinos() {
       <div className="cartao" style={{ marginTop: 22 }}>
         <div className="cabeca">
           <h2>Lançar despesa</h2>
-          <p className="sub" style={{ marginTop: -6 }}>Selecione um animal para um custo individual ou vários para dividir o valor total igualmente.</p>
+          <p className="sub" style={{ marginTop: -6 }}>Selecione um animal para um custo individual, vários para dividir o valor ou deixe todos desmarcados para ratear entre todos os equinos ativos.</p>
         </div>
         <div className="corpo">
           {!disponiveis.length ? (
