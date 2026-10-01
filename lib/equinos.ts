@@ -34,3 +34,14 @@ export function ratearValor(valorTotal: number, quantidade: number) {
     (_, indice) => (valorBase + (indice < sobra ? 1 : 0)) / 100,
   )
 }
+
+export function distribuirCustoEquino(valorTotal: number, equinoIds: string[]) {
+  if (!equinoIds.length)
+    return [{ equino_id: null, valor: ratearValor(valorTotal, 1)[0] }]
+
+  const valores = ratearValor(valorTotal, equinoIds.length)
+  return equinoIds.map((equino_id, indice) => ({
+    equino_id,
+    valor: valores[indice],
+  }))
+}

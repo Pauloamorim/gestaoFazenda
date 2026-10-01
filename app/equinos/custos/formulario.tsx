@@ -46,7 +46,7 @@ export function FormularioCustoEquinos({
         <small className="selecao-confirmada">
           {selecionados.length
             ? `${selecionados.length} equino${selecionados.length > 1 ? 's' : ''} selecionado${selecionados.length > 1 ? 's' : ''}.`
-            : `Nenhum selecionado: o valor será dividido entre todos os ${equinos.length} equinos ativos.`}
+            : 'Nenhum selecionado: será registrado como custo geral do plantel.'}
         </small>
       </fieldset>
       <label>Categoria<input name="categoria" list="categorias-custo-equino" required /></label>

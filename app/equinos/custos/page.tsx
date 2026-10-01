@@ -30,7 +30,7 @@ export default async function CustosEquinos() {
       <div className="cartao" style={{ marginTop: 22 }}>
         <div className="cabeca">
           <h2>Lançar despesa</h2>
-          <p className="sub" style={{ marginTop: -6 }}>Selecione um animal para um custo individual, vários para dividir o valor ou deixe todos desmarcados para ratear entre todos os equinos ativos.</p>
+          <p className="sub" style={{ marginTop: -6 }}>Selecione um animal para um custo individual, vários para dividir o valor ou deixe todos desmarcados para registrar um custo geral do plantel.</p>
         </div>
         <div className="corpo">
           {!disponiveis.length ? (
@@ -58,7 +58,7 @@ export default async function CustosEquinos() {
           <table><thead><tr><th>Data</th><th>Animal</th><th>Categoria</th><th>Descrição</th><th>Ciclo</th><th className="num">Valor atribuído</th><th className="acao"></th></tr></thead><tbody>
             {custos.map((c: any) => <tr key={c.id}>
               <td>{dia(c.data)}</td>
-              <td><LinkTabela href={`/equinos/${c.equino_id}/custos`}>{c.equinos?.nome ?? '—'}</LinkTabela></td>
+              <td>{c.equino_id ? <LinkTabela href={`/equinos/${c.equino_id}/custos`}>{c.equinos?.nome ?? '—'}</LinkTabela> : <span className="etiqueta">Geral / plantel</span>}</td>
               <td><span className="etiqueta">{c.categoria}</span></td>
               <td>{c.descricao ?? '—'}</td>
               <td>{c.reproducoes_equinas?.estacao ?? '—'}</td>

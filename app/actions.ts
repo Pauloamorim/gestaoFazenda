@@ -5,7 +5,7 @@ import { redirect } from 'next/navigation'
 import { db, ok } from '@/lib/supabase'
 import { numero, numeroObrigatorio, obrigatorio, texto } from '@/lib/campos'
 import { CATEGORIAS, FONTE, interpretarCotacoes } from '@/lib/cotacoes'
-import { ratearValor } from '@/lib/equinos'
+import { distribuirCustoEquino } from '@/lib/equinos'
 
 // --- conta ---
 
@@ -536,7 +536,7 @@ export async function criarCustoEquino(fd: FormData) {
 }
 
 export async function criarCustoEquinos(fd: FormData) {
-  let equino_ids = [
+  const equino_ids = [
     ...new Set(
       fd
         .getAll('equino_ids')
@@ -545,26 +545,18 @@ export async function criarCustoEquinos(fd: FormData) {
     ),
   ]
 
-  const sb = await db()
-  if (!equino_ids.length) {
-    const ativos = ok(await sb.from('equinos').select('id').eq('situacao', 'Ativo'))
-    equino_ids = ativos.map((equino) => equino.id)
-  }
-  if (!equino_ids.length) throw new Error('Não há equinos ativos para receber esta despesa.')
-
   const valorTotal = numeroObrigatorio(fd.get('valor'), 'Valor total')
   const categoria = obrigatorio(fd.get('categoria'), 'Categoria')
   const descricao = texto(fd.get('descricao'))
   const data = obrigatorio(fd.get('data'), 'Data')
-  const valores = ratearValor(valorTotal, equino_ids.length)
-  const lancamentos = equino_ids.map((equino_id, indice) => ({
-    equino_id,
+  const lancamentos = distribuirCustoEquino(valorTotal, equino_ids).map((destino) => ({
+    ...destino,
     categoria,
     descricao,
     data,
-    valor: valores[indice],
   }))
 
+  const sb = await db()
   ok(await sb.from('custos_equinos').insert(lancamentos))
   revalidatePath('/equinos', 'layout')
   revalidatePath('/equinos/custos')
