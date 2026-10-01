@@ -304,6 +304,62 @@ form.linha > button {
   flex: none;
 }
 
+.selecao-equinos {
+  flex: 1 1 100%;
+  min-width: 0;
+  margin: 0;
+  padding: 10px;
+  border: 1px solid var(--linha);
+  border-radius: 5px;
+}
+.selecao-equinos legend {
+  padding: 0 5px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--fraco);
+}
+.grade-selecao-equinos {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 7px;
+}
+.check-equino {
+  display: flex;
+  grid-template-columns: none;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 9px;
+  border: 1px solid var(--linha);
+  border-radius: 5px;
+  background: #fbfcfb;
+  letter-spacing: 0;
+  text-transform: none;
+  cursor: pointer;
+}
+.check-equino:has(input:checked) {
+  border-color: var(--curral);
+  background: #eef3f1;
+}
+.check-equino input {
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  flex: none;
+  accent-color: var(--curral);
+}
+.check-equino span {
+  display: grid;
+  line-height: 1.2;
+}
+.check-equino strong {
+  color: var(--tinta);
+}
+.check-equino small {
+  color: var(--fraco);
+}
+
 label {
   display: grid;
   gap: 4px;

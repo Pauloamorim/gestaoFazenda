@@ -39,6 +39,9 @@ export default async function Casco({ children }: { children: React.ReactNode })
           <Link href="/equinos/novo" className="novo-lote">
             + Cadastrar cavalo
           </Link>
+          <Link href="/equinos/custos" className="novo-lote">
+            Custos dos equinos
+          </Link>
 
           <p className="rotulo">Ração</p>
           <NavItem href="/racao">Formulações</NavItem>

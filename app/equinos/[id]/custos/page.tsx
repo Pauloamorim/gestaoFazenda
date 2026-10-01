@@ -3,8 +3,7 @@ import { carregarEquino } from '@/lib/dados'
 import { brl, dia, hoje } from '@/lib/campos'
 import { criarCustoEquino } from '../../../actions'
 import { Excluir, Vazio } from '../../../componentes'
-
-const CATEGORIAS = ['Alimentação', 'Veterinário', 'Medicamento', 'Sêmen / cobertura', 'Coleta', 'Inseminação', 'Transferência de embrião', 'Receptora', 'Ultrassom / diagnóstico', 'DNA / registro', 'Ferrageamento', 'Transporte', 'Treinamento', 'Outro']
+import { CATEGORIAS_CUSTO_EQUINO } from '@/lib/equinos'
 
 export default async function CustosEquino({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -27,7 +26,7 @@ export default async function CustosEquino({ params }: { params: Promise<{ id: s
         <div className="corpo"><form action={criarCustoEquino} className="linha">
           <input type="hidden" name="equino_id" value={id} />
           <label>Categoria<input name="categoria" list="categorias-equino" required /></label>
-          <datalist id="categorias-equino">{CATEGORIAS.map((x) => <option key={x} value={x} />)}</datalist>
+          <datalist id="categorias-equino">{CATEGORIAS_CUSTO_EQUINO.map((x) => <option key={x} value={x} />)}</datalist>
           <label>Data<input name="data" type="date" required defaultValue={hoje()} /></label>
           <label>Valor (R$)<input name="valor" type="number" min="0" step="0.01" required /></label>
           <label>Ciclo reprodutivo<select name="reproducao_id" defaultValue=""><option value="">Não relacionado</option>{reproducoes.map((r: any) => <option key={r.id} value={r.id}>{r.estacao} · {r.metodo}</option>)}</select></label>

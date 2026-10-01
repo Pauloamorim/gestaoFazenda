@@ -263,6 +263,19 @@ export const listarReproducoesEquinas = cache(async () =>
   }),
 )
 
+export const listarCustosEquinos = cache(async () =>
+  medir('listarCustosEquinos', async () => {
+    const sb = await db()
+    return ok(
+      await sb
+        .from('custos_equinos')
+        .select('*, equinos(id, nome), reproducoes_equinas(estacao)')
+        .order('data', { ascending: false })
+        .order('criado_em', { ascending: false }),
+    )
+  }),
+)
+
 export const listarLembretesEquinos = cache(async () =>
   medir('listarLembretesEquinos', async () => {
     const sb = await db()

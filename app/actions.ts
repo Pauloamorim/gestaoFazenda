@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation'
 import { db, ok } from '@/lib/supabase'
 import { numero, numeroObrigatorio, obrigatorio, texto } from '@/lib/campos'
 import { CATEGORIAS, FONTE, interpretarCotacoes } from '@/lib/cotacoes'
+import { ratearValor } from '@/lib/equinos'
 
 // --- conta ---
 
@@ -531,6 +532,38 @@ export async function criarCustoEquino(fd: FormData) {
   )
   revalidatePath('/equinos', 'layout')
   revalidatePath(`/equinos/${equino_id}`, 'layout')
+  revalidatePath('/equinos/custos')
+}
+
+export async function criarCustoEquinos(fd: FormData) {
+  const equino_ids = [
+    ...new Set(
+      fd
+        .getAll('equino_ids')
+        .map((id) => texto(id))
+        .filter((id): id is string => Boolean(id)),
+    ),
+  ]
+  if (!equino_ids.length) throw new Error('Selecione pelo menos um equino.')
+
+  const valorTotal = numeroObrigatorio(fd.get('valor'), 'Valor total')
+  const categoria = obrigatorio(fd.get('categoria'), 'Categoria')
+  const descricao = texto(fd.get('descricao'))
+  const data = obrigatorio(fd.get('data'), 'Data')
+  const valores = ratearValor(valorTotal, equino_ids.length)
+  const lancamentos = equino_ids.map((equino_id, indice) => ({
+    equino_id,
+    categoria,
+    descricao,
+    data,
+    valor: valores[indice],
+  }))
+
+  const sb = await db()
+  ok(await sb.from('custos_equinos').insert(lancamentos))
+  revalidatePath('/equinos', 'layout')
+  revalidatePath('/equinos/custos')
+  for (const equino_id of equino_ids) revalidatePath(`/equinos/${equino_id}`, 'layout')
 }
 
 export async function enviarDocumentoEquino(fd: FormData) {
@@ -682,6 +715,7 @@ export async function excluir(fd: FormData) {
 
   ok(await sb.from(tabela).delete().eq('id', id))
   if (tabela === 'compras_ingrediente') revalidatePath('/lotes', 'layout')
+  if (tabela === 'custos_equinos') revalidatePath('/equinos', 'layout')
   const ir = texto(fd.get('ir'))
   if (ir) redirect(ir)
   revalidatePath(obrigatorio(fd.get('revalidar'), 'destino'), 'layout')
