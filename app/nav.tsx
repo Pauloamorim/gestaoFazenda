@@ -28,9 +28,21 @@ export function Aba({ href, children }: { href: string; children: React.ReactNod
 
 export function NavItem({ href, children, prefixo = false }: { href: string; children: React.ReactNode; prefixo?: boolean }) {
   const caminho = usePathname()
-  const ativo = caminho === href || (prefixo && caminho.startsWith(`${href}/`))
+  const ativo = caminho === href || (prefixo && caminho.startsWith(`${href}/`) && caminho !== '/equinos/novo' && caminho !== '/equinos/custos')
   return (
     <Link href={href} className={ativo ? 'lote-link ativo' : 'lote-link'} {...aoPassar}>
+      <span>{children}</span>
+    </Link>
+  )
+}
+
+export function NavAcao({ href, children }: { href: string; children: React.ReactNode }) {
+  const ativo = usePathname() === href
+  return (
+    <Link href={href} className={ativo ? 'nav-acao ativo' : 'nav-acao'} aria-current={ativo ? 'page' : undefined} {...aoPassar}>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true">
+        <path d="M12 5v14M5 12h14" />
+      </svg>
       <span>{children}</span>
     </Link>
   )

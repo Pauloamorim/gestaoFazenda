@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { db } from '@/lib/supabase'
 import { listarEquinos, listarLotes } from '@/lib/dados'
 import { cabecasAtivas } from '@/lib/campos'
-import { NavItem, NavLote } from './nav'
+import { NavAcao, NavItem, NavLote } from './nav'
 import { sair } from './actions'
 
 /** Barra lateral + área de conteúdo. Usada por /lotes e /racao. */
@@ -28,20 +28,14 @@ export default async function Casco({ children }: { children: React.ReactNode })
           {lotes.map((l: any) => (
             <NavLote key={l.id} href={`/lotes/${l.id}`} nome={l.nome} cabecas={cabecasAtivas(l.quantidade, l.saidas ?? [])} />
           ))}
-          <Link href="/lotes/novo" className="novo-lote">
-            + Cadastrar lote
-          </Link>
+          <NavAcao href="/lotes/novo">Cadastrar lote</NavAcao>
 
           <p className="rotulo">Equinos</p>
           <NavItem href="/equinos" prefixo>
             Cavalos · {equinos.filter((e: any) => e.situacao === 'Ativo').length}
           </NavItem>
-          <Link href="/equinos/novo" className="novo-lote">
-            + Cadastrar cavalo
-          </Link>
-          <Link href="/equinos/custos" className="novo-lote">
-            Custos dos equinos
-          </Link>
+          <NavItem href="/equinos/custos">Custos dos equinos</NavItem>
+          <NavAcao href="/equinos/novo">Cadastrar cavalo</NavAcao>
 
           <p className="rotulo">Ração</p>
           <NavItem href="/racao">Formulações</NavItem>

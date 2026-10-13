@@ -152,19 +152,30 @@ a {
   text-overflow: ellipsis;
 }
 
-.novo-lote {
-  display: block;
-  margin: 8px 20px 16px;
-  padding: 8px;
-  text-align: center;
-  border: 1px dashed #3d565f;
-  border-radius: 5px;
-  color: #b6c9cb;
+.nav-acao {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 42px;
+  margin: 12px 16px 18px;
+  padding: 10px 12px;
+  border: 1px solid #3d565f;
+  border-radius: 8px;
+  background: var(--curral-alto);
+  color: #dfe7e6;
+  font-size: 13px;
   font-weight: 500;
+  transition: background 0.12s, border-color 0.12s, color 0.12s;
 }
-.novo-lote:hover {
-  border-color: var(--brinco);
+.nav-acao svg {
+  flex: none;
   color: var(--brinco);
+}
+.nav-acao:hover,
+.nav-acao.ativo {
+  border-color: var(--brinco);
+  background: #2b414a;
+  color: #fff;
 }
 
 .conteudo {
@@ -173,6 +184,7 @@ a {
 }
 
 .lotes-nav .rotulo {
+  margin: 10px 0 4px;
   padding: 14px 20px 6px;
   color: #7d949a;
 }

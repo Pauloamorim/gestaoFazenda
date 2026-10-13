@@ -6,7 +6,8 @@ import { atualizarCotacoes } from '../actions'
 import { Vazio } from '../componentes'
 import { GraficoSerie } from '../grafico'
 
-const PADRAO = 'boi_gordo'
+const PADRAO = 'novilha_gorda'
+const PRACA_PADRAO = 'MG B.Horizonte'
 
 export default async function Cotacoes({
   searchParams,
@@ -19,7 +20,7 @@ export default async function Cotacoes({
 
   const ultimaData = linhas[0]?.data
   const doDia = linhas.filter((c: any) => c.data === ultimaData)
-  const escolhida = busca.praca ?? doDia[0]?.praca
+  const escolhida = busca.praca ?? PRACA_PADRAO
   const historico = escolhida ? await historicoPraca(categoria, escolhida) : []
   const unidade = historico[0]?.unidade ?? '@'
 
