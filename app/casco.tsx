@@ -35,7 +35,6 @@ export default async function Casco({ children }: { children: React.ReactNode })
             Cavalos · {equinos.filter((e: any) => e.situacao === 'Ativo').length}
           </NavItem>
           <NavItem href="/equinos/custos">Custos dos equinos</NavItem>
-          <NavAcao href="/equinos/novo">Cadastrar cavalo</NavAcao>
 
           <p className="rotulo">Ração</p>
           <NavItem href="/racao">Formulações</NavItem>

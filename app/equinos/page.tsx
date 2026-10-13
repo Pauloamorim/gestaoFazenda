@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { listarEquinos, listarLembretesEquinos, listarReproducoesEquinas, totalEquino } from '@/lib/dados'
 import { brl, dia, hoje } from '@/lib/campos'
 import { LinkTabela } from '../nav'
@@ -31,8 +32,15 @@ export default async function Equinos() {
 
   return (
     <>
-      <h1>Criação Mangalarga Marchador</h1>
-      <p className="sub">Plantel, genealogia, reprodução e custos dos seus equinos.</p>
+      <div className="topo">
+        <div>
+          <h1>Criação Mangalarga Marchador</h1>
+          <p className="sub">Plantel, genealogia, reprodução e custos dos seus equinos.</p>
+        </div>
+        <Link href="/equinos/novo" className="acao-cadastro">
+          <span aria-hidden="true">+</span> Cadastrar cavalo
+        </Link>
+      </div>
 
       <div className="readout">
         <div><span className="n">{ativos.length}</span><span className="rotulo">Equinos ativos</span></div>
