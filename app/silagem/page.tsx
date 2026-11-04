@@ -1,23 +1,23 @@
 import Link from 'next/link'
 import { brl, dia, hoje } from '@/lib/campos'
-import { listarAreasSilagem, listarCustosSilagem, listarDepositosSilagem, listarMovimentosSilagem } from '@/lib/dados'
-import { custoPorSaco, saldoPorDeposito } from '@/lib/silagem'
+import { listarAreasSilagem, listarDepositosSilagem, listarInsumosSilagem, listarMovimentosSilagem } from '@/lib/dados'
+import { custoDoSaco, saldoPorDeposito } from '@/lib/silagem'
 import { registrarProducaoSilagem, registrarUsoSilagem } from '../actions'
 import { Excluir, Vazio } from '../componentes'
 
 const TIPO = { producao: 'Produção', uso: 'Uso', saldo_inicial: 'Saldo inicial' } as Record<string, string>
 
 export default async function Silagem() {
-  const [areas, depositos, movimentos, custos] = await Promise.all([
+  const [areas, depositos, movimentos, insumos] = await Promise.all([
     listarAreasSilagem(),
     listarDepositosSilagem(),
     listarMovimentosSilagem(),
-    listarCustosSilagem(),
+    listarInsumosSilagem(),
   ])
   const saldo = saldoPorDeposito(movimentos)
   const estoque = [...saldo.values()].reduce((s, n) => s + n, 0)
   const soma = (tipo: string) => movimentos.filter((m: any) => m.tipo === tipo).reduce((s: number, m: any) => s + m.sacos, 0)
-  const custo = custoPorSaco(custos, movimentos)
+  const custo = custoDoSaco(insumos)
   const producaoArea = new Map<string, number>()
   for (const m of movimentos)
     if (m.tipo === 'producao') producaoArea.set(m.area_id, (producaoArea.get(m.area_id) ?? 0) + m.sacos)
@@ -31,10 +31,8 @@ export default async function Silagem() {
         <div className="destaque"><span className="n">{estoque}</span><span className="rotulo">Sacos em estoque</span></div>
         <div><span className="n">{soma('producao')}</span><span className="rotulo">Produzidos</span></div>
         <div><span className="n">{soma('uso')}</span><span className="rotulo">Usados</span></div>
-        <div>
-          <span className="n">{custo.sacos ? brl(custo.geral) : '—'}</span>
-          <span className="rotulo">{custo.desde ? `Custo/saco desde ${dia(custo.desde)}` : 'Custo/saco'}</span>
-        </div>
+        <div><span className="n">{insumos.length ? brl(custo) : '—'}</span><span className="rotulo">Custo por saco</span></div>
+        <div><span className="n">{insumos.length ? brl(custo * estoque) : '—'}</span><span className="rotulo">Valor do estoque</span></div>
       </div>
 
       {!areas.length || !depositos.length ? (
@@ -88,17 +86,15 @@ export default async function Silagem() {
       {!!areas.length && (
         <div className="cartao">
           <div className="cabeca"><h2>Produção por área</h2></div>
-          <table><thead><tr><th>Área</th><th>Cultura</th><th className="num">Tamanho</th><th className="num">Sacos produzidos</th><th className="num">Sacos/ha</th><th className="num">Custo/saco</th></tr></thead><tbody>
+          <table><thead><tr><th>Área</th><th>Cultura</th><th className="num">Tamanho</th><th className="num">Sacos produzidos</th><th className="num">Sacos/ha</th></tr></thead><tbody>
             {areas.map((a: any) => {
               const sacos = producaoArea.get(a.id) ?? 0
-              const c = custo.porArea.get(a.id)
               return <tr key={a.id}>
                 <td>{a.nome}</td>
                 <td><span className="etiqueta">{a.cultura}</span></td>
                 <td className="num">{a.tamanho_ha ? `${Number(a.tamanho_ha).toLocaleString('pt-BR')} ha` : '—'}</td>
                 <td className="num">{sacos}</td>
                 <td className="num">{a.tamanho_ha ? (sacos / Number(a.tamanho_ha)).toFixed(0) : '—'}</td>
-                <td className="num">{c !== undefined ? brl(c) : '—'}</td>
               </tr>
             })}
           </tbody></table>

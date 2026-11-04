@@ -397,15 +397,9 @@ export const listarMovimentosSilagem = cache(async () =>
   }),
 )
 
-export const listarCustosSilagem = cache(async () =>
-  medir('listarCustosSilagem', async () => {
+export const listarInsumosSilagem = cache(async () =>
+  medir('listarInsumosSilagem', async () => {
     const sb = await db()
-    return ok(
-      await sb
-        .from('silagem_custos')
-        .select('*, silagem_areas(nome)')
-        .order('data', { ascending: false })
-        .order('criado_em', { ascending: false }),
-    )
+    return ok(await sb.from('silagem_insumos').select('*').order('nome'))
   }),
 )

@@ -751,17 +751,23 @@ export async function registrarUsoSilagem(fd: FormData) {
   revalidatePath('/silagem', 'layout')
 }
 
-export async function criarCustoSilagem(fd: FormData) {
+const insumoSilagem = (fd: FormData) => ({
+  nome: obrigatorio(fd.get('nome'), 'Insumo'),
+  unidade: obrigatorio(fd.get('unidade'), 'Unidade'),
+  qtd_comprada: numeroObrigatorio(fd.get('qtd_comprada'), 'Quantidade comprada'),
+  valor_pago: numeroObrigatorio(fd.get('valor_pago'), 'Valor pago'),
+  qtd_por_saco: numeroObrigatorio(fd.get('qtd_por_saco'), 'Quantidade por saco'),
+})
+
+export async function criarInsumoSilagem(fd: FormData) {
   const sb = await db()
-  ok(
-    await sb.from('silagem_custos').insert({
-      area_id: texto(fd.get('area_id')),
-      categoria: obrigatorio(fd.get('categoria'), 'Categoria'),
-      descricao: texto(fd.get('descricao')),
-      data: obrigatorio(fd.get('data'), 'Data'),
-      valor: numeroObrigatorio(fd.get('valor'), 'Valor'),
-    }),
-  )
+  ok(await sb.from('silagem_insumos').insert(insumoSilagem(fd)))
+  revalidatePath('/silagem', 'layout')
+}
+
+export async function atualizarInsumoSilagem(fd: FormData) {
+  const sb = await db()
+  ok(await sb.from('silagem_insumos').update(insumoSilagem(fd)).eq('id', obrigatorio(fd.get('id'), 'id')))
   revalidatePath('/silagem', 'layout')
 }
 
@@ -783,7 +789,7 @@ const TABELAS = [
   'silagem_areas',
   'silagem_depositos',
   'silagem_movimentos',
-  'silagem_custos',
+  'silagem_insumos',
 ] as const
 
 export async function excluir(fd: FormData) {
@@ -806,13 +812,8 @@ export async function excluir(fd: FormData) {
 
   if (tabela === 'silagem_areas' || tabela === 'silagem_depositos') {
     const coluna = tabela === 'silagem_areas' ? 'area_id' : 'deposito_id'
-    const [{ count: movimentos }, { count: custos }] = await Promise.all([
-      sb.from('silagem_movimentos').select('id', { count: 'exact', head: true }).eq(coluna, id),
-      tabela === 'silagem_areas'
-        ? sb.from('silagem_custos').select('id', { count: 'exact', head: true }).eq('area_id', id)
-        : Promise.resolve({ count: 0 }),
-    ])
-    if (movimentos || custos)
+    const { count } = await sb.from('silagem_movimentos').select('id', { count: 'exact', head: true }).eq(coluna, id)
+    if (count)
       throw new Error('Este cadastro tem lançamentos de silagem. Exclua os lançamentos antes.')
   }
 
