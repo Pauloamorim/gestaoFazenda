@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Bricolage_Grotesque, Public_Sans } from 'next/font/google'
 import './globals.css'
 
@@ -12,6 +12,8 @@ const corpo = Public_Sans({
   weight: ['400', '500', '600', '700'],
   variable: '--f-corpo',
 })
+
+export const viewport: Viewport = { viewportFit: 'cover', themeColor: '#1f3a2c' }
 
 export const metadata: Metadata = {
   title: 'Gestão Fazenda',

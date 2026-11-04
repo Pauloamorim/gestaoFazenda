@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { db } from '@/lib/supabase'
 import { listarEquinos, listarLotes } from '@/lib/dados'
 import { cabecasAtivas } from '@/lib/campos'
-import { NavAcao, NavItem, NavLote } from './nav'
+import { AbasCelular, AtalhosCelular, NavAcao, NavItem, NavLote } from './nav'
 import { sair } from './actions'
 
 /** Barra lateral + área de conteúdo, usada por todas as telas internas. */
@@ -25,7 +25,6 @@ export default async function Casco({ children }: { children: React.ReactNode })
 
         <div className="lotes-nav">
           <p className="rotulo">Gado</p>
-          <NavItem href="/lotes" prefixo className="so-celular">Rebanho</NavItem>
           {lotes.map((l: any) => (
             <NavLote key={l.id} href={`/lotes/${l.id}`} nome={l.nome} cabecas={cabecasAtivas(l.quantidade, l.saidas ?? [])} />
           ))}
@@ -58,7 +57,18 @@ export default async function Casco({ children }: { children: React.ReactNode })
         </div>
       </nav>
 
-      <div className="conteudo">{children}</div>
+      <header className="topo-celular so-celular">
+        <Link href="/lotes" className="marca">Gestão Fazenda</Link>
+        <form action={sair}>
+          <button title={email}>Sair</button>
+        </form>
+      </header>
+
+      <div className="conteudo">
+        <AtalhosCelular />
+        {children}
+      </div>
+      <AbasCelular />
     </div>
   )
 }
