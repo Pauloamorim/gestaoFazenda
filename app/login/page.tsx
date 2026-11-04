@@ -7,7 +7,7 @@ export default async function Login({ searchParams }: { searchParams: Promise<{ 
       <div className="caixa">
         <p className="rotulo">Fazenda</p>
         <h1>Gestão Fazenda</h1>
-        <p className="sub">Lotes, custos, sanidade e peso — num lugar só.</p>
+        <p className="sub">Gado, cavalos, ração e silagem num lugar só.</p>
 
         {erro && (
           <p className="aviso" style={{ marginTop: 18, marginBottom: 0 }}>

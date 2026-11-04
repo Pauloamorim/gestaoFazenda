@@ -1,30 +1,50 @@
 import { notFound } from 'next/navigation'
 import { carregarEquino } from '@/lib/dados'
-import { brl, dia } from '@/lib/campos'
+import { brl, dia, hoje } from '@/lib/campos'
 import { Aba } from '../../nav'
+
+/** "8 anos", "11 meses" — a idade é o que se fala no curral, não a data. */
+function idade(nascimento: string) {
+  const [a, m] = hoje().split('-').map(Number)
+  const [na, nm] = nascimento.split('-').map(Number)
+  const meses = (a - na) * 12 + (m - nm)
+  if (meses < 12) return `${Math.max(meses, 0)} ${meses === 1 ? 'mês' : 'meses'}`
+  const anos = Math.floor(meses / 12)
+  return `${anos} ${anos === 1 ? 'ano' : 'anos'}`
+}
 
 export default async function EquinoLayout({ children, params }: { children: React.ReactNode; params: Promise<{ id: string }> }) {
   const { id } = await params
   const dados = await carregarEquino(id)
   if (!dados) notFound()
-  const { equino, eventos, reproducoes, investido } = dados
-  const ultimoPeso = eventos.find((e: any) => e.peso)
-  const prenhezes = reproducoes.filter((r: any) => r.status === 'Prenhez confirmada').length
+  const { equino, fotos, investido } = dados
+  const capa = fotos.find((f: any) => f.principal) ?? fotos[0]
+  const detalhes = [
+    equino.nascimento && `${idade(equino.nascimento)}, nascido em ${dia(equino.nascimento)}`,
+    equino.localizacao,
+  ].filter(Boolean)
 
   return (
     <>
-      <h1>{equino.nome}</h1>
-      <p className="sub">
-        {equino.registro_abccmm ? `ABCCMM ${equino.registro_abccmm}` : 'Sem registro ABCCMM'}
-        {equino.nascimento ? ` · Nascido em ${dia(equino.nascimento)}` : ''}
-        {equino.localizacao ? ` · ${equino.localizacao}` : ''}
-      </p>
-      <div className="readout">
-        <div><span className="n">{equino.sexo}</span><span className="rotulo">Sexo</span></div>
-        <div><span className="n">{equino.funcao_reprodutiva}</span><span className="rotulo">Função</span></div>
-        <div><span className="n">{ultimoPeso ? Number(ultimoPeso.peso).toFixed(0) : '—'}</span><span className="rotulo">Último peso (kg)</span></div>
-        <div><span className="n">{prenhezes || '—'}</span><span className="rotulo">Prenhezes relacionadas</span></div>
-        <div className="destaque"><span className="n">{brl(investido)}</span><span className="rotulo">Investido</span></div>
+      <div className="cabecalho-equino">
+        <div className="retrato">
+          {capa ? <img src={`/fotos-equinos/${capa.id}`} alt={capa.legenda || `Foto de ${equino.nome}`} /> : equino.nome.slice(0, 1)}
+        </div>
+        <div>
+          <h1>{equino.nome}</h1>
+          {!!detalhes.length && <p className="sub">{detalhes.join(' — ')}</p>}
+          <div className="marcas-equino">
+            <span className="etiqueta destaque-etiqueta">{equino.funcao_reprodutiva}</span>
+            <span className="etiqueta">{equino.sexo}</span>
+            <span className="etiqueta">{equino.registro_abccmm ? `ABCCMM ${equino.registro_abccmm}` : 'Sem registro'}</span>
+            {equino.andamento !== 'Não avaliado' && <span className="etiqueta">{equino.andamento}</span>}
+            {equino.situacao !== 'Ativo' && <span className="etiqueta alerta">{equino.situacao}</span>}
+          </div>
+        </div>
+        <div className="investido-equino">
+          <span className="rotulo">Investido</span>
+          <strong>{brl(investido)}</strong>
+        </div>
       </div>
       <div className="abas">
         <Aba href={`/equinos/${id}`}>Resumo</Aba>

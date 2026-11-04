@@ -4,8 +4,8 @@ import { carregarEquino, listarEquinos } from '@/lib/dados'
 import { brl, dia, diasEntre, hoje } from '@/lib/campos'
 import { atualizarEquino, excluir } from '../../actions'
 import { Vazio } from '../../componentes'
+import { CamposEquino } from '../campos'
 
-const FUNCOES = ['Garanhão', 'Matriz / doadora', 'Receptora', 'Potro', 'Jovem', 'Castrado']
 
 export default async function ResumoEquino({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -22,98 +22,90 @@ export default async function ResumoEquino({ params }: { params: Promise<{ id: s
     .slice(0, 5)
   const custoMedio = custos.length ? custos.reduce((s: number, c: any) => s + Number(c.valor), 0) / custos.length : 0
 
-  const avo = (x: any) => x ? <Link href={`/equinos/${x.id}`}>{x.nome}</Link> : '—'
-  const genitor = (x: any, nome: string | null) => x ? avo(x) : nome || '—'
+  const ultimoPeso = eventos.find((e: any) => e.peso)
+  const dado = (rotulo: string, valor: React.ReactNode) => (
+    <div><dt>{rotulo}</dt>{valor ? <dd>{valor}</dd> : <dd className="vazio-dado">Não informado</dd>}</div>
+  )
+  const no = (classe: string, papel: string, x: any, nomeLivre?: string | null) => (
+    <div className={`no ${classe}${x || nomeLivre ? '' : ' desconhecido'}`}>
+      <small>{papel}</small>
+      <b>{x ? <Link href={`/equinos/${x.id}`}>{x.nome}</Link> : nomeLivre || 'Não informado'}</b>
+    </div>
+  )
 
   return (
     <>
-      <div className="cartao">
-        <div className="cabeca"><h2>Identidade e registro</h2></div>
-        <div className="corpo identidade-equino">
-          {fotoPrincipal && <Link className="foto-capa-equino" href={`/equinos/${id}/fotos`}>
-            <img src={`/fotos-equinos/${fotoPrincipal.id}`} alt={fotoPrincipal.legenda || `Foto de ${equino.nome}`} />
-          </Link>}
-          <div><div className="comparativo">
-            <div><span className="rotulo">Registro</span><strong>{equino.status_registro}</strong></div>
-            <div><span className="rotulo">DNA</span><strong>{equino.dna_status}</strong></div>
-            <div><span className="rotulo">Microchip</span><strong>{equino.microchip ?? '—'}</strong></div>
-            <div><span className="rotulo">Pelagem</span><strong>{equino.pelagem ?? '—'}</strong></div>
-            <div><span className="rotulo">Andamento</span><strong>{equino.andamento}</strong></div>
-            <div><span className="rotulo">Situação</span><strong>{equino.situacao}</strong></div>
+      <div className="duas-colunas">
+        <div className="cartao">
+          <div className="cabeca"><h2>Ficha</h2></div>
+          <div className="corpo">
+            <dl className="dados">
+              {dado('Registro', equino.status_registro)}
+              {dado('DNA', equino.dna_status)}
+              {dado('Microchip', equino.microchip)}
+              {dado('Pelagem', equino.pelagem)}
+              {dado('Andamento', equino.andamento !== 'Não avaliado' && equino.andamento)}
+              {dado('Último peso', ultimoPeso && `${Number(ultimoPeso.peso).toFixed(0)} kg em ${dia(ultimoPeso.data)}`)}
+              {dado('Criador', equino.criador)}
+              {dado('Proprietário', equino.proprietario)}
+            </dl>
+            {equino.observacoes && <p className="sub" style={{ marginTop: 18 }}>{equino.observacoes}</p>}
+            {!fotoPrincipal && <p className="sub" style={{ marginTop: 18 }}><Link href={`/equinos/${id}/fotos`}>Adicionar uma foto</Link></p>}
           </div>
-          {equino.observacoes && <p className="sub" style={{ marginTop: 14 }}>{equino.observacoes}</p>}
-          {!fotoPrincipal && <p className="sub" style={{ marginTop: 14 }}><Link href={`/equinos/${id}/fotos`}>Adicionar foto do equino</Link></p>}
-          </div>
+        </div>
+
+        <div className="cartao">
+          <div className="cabeca"><h2>Próximos cuidados</h2></div>
+          {!pendencias.length ? (
+            <Vazio titulo="Nada agendado." dica={<>Em <Link href={`/equinos/${id}/saude`}>Saúde e manejo</Link>, informe a próxima vacina, ferrageamento ou exame.</>} />
+          ) : (
+            <table><tbody>
+              {pendencias.map((e: any) => <tr key={e.id}>
+                <td><strong>{e.tipo}</strong><br /><span className="rotulo">{e.descricao ?? dia(e.proxima_data)}</span></td>
+                <td className="num">{dia(e.proxima_data)}<br /><span className="rotulo">em {diasEntre(hoje(), e.proxima_data)} dias</span></td>
+              </tr>)}
+            </tbody></table>
+          )}
         </div>
       </div>
 
       <div className="cartao">
-        <div className="cabeca"><h2>Pedigree · três gerações</h2></div>
-        {!pai && !mae && !equino.pai_nome && !equino.mae_nome ? (
-          <Vazio titulo="Genealogia não informada." dica="Cadastre os ancestrais como animais de referência e selecione pai e mãe abaixo." />
-        ) : (
-          <table>
-            <thead><tr><th>Animal</th><th>Genitor</th><th>Avô</th><th>Avó</th></tr></thead>
-            <tbody>
-              <tr><td rowSpan={2}><strong>{equino.nome}</strong></td><td><span className="etiqueta">Pai</span> {genitor(pai, equino.pai_nome)}</td><td>{avo(porId.get(pai?.pai_id))}</td><td>{avo(porId.get(pai?.mae_id))}</td></tr>
-              <tr><td><span className="etiqueta">Mãe</span> {genitor(mae, equino.mae_nome)}</td><td>{avo(porId.get(mae?.pai_id))}</td><td>{avo(porId.get(mae?.mae_id))}</td></tr>
-            </tbody>
-          </table>
-        )}
-      </div>
-
-      <div className="cartao">
-        <div className="cabeca"><h2>Próximos cuidados</h2></div>
-        {!pendencias.length ? (
-          <Vazio titulo="Nenhum cuidado agendado." dica="Em Saúde e manejo, informe a próxima data de vacina, ferrageamento ou exame." />
-        ) : (
-          <table><thead><tr><th>Data</th><th>Tipo</th><th>Descrição</th><th className="num">Em</th></tr></thead><tbody>
-            {pendencias.map((e: any) => <tr key={e.id}><td>{dia(e.proxima_data)}</td><td>{e.tipo}</td><td>{e.descricao ?? '—'}</td><td className="num">{diasEntre(hoje(), e.proxima_data)} dias</td></tr>)}
-          </tbody></table>
-        )}
+        <div className="cabeca"><h2>Pedigree</h2></div>
+        <div className="pedigree">
+          <div className="no raiz"><small>{equino.sexo === 'Fêmea' ? 'Égua' : 'Cavalo'}</small><b>{equino.nome}</b></div>
+          {no('pai', 'Pai', pai, equino.pai_nome)}
+          {no('mae', 'Mãe', mae, equino.mae_nome)}
+          {no('avo', 'Avô paterno', porId.get(pai?.pai_id))}
+          {no('avo', 'Avó paterna', porId.get(pai?.mae_id))}
+          {no('avo', 'Avô materno', porId.get(mae?.pai_id))}
+          {no('avo', 'Avó materna', porId.get(mae?.mae_id))}
+        </div>
       </div>
 
       <div className="cartao">
         <div className="cabeca"><h2>Financeiro</h2></div>
-        <div className="corpo"><div className="comparativo">
-          <div><span className="rotulo">Aquisição</span><strong>{brl(Number(equino.valor_aquisicao))}</strong></div>
-          <div><span className="rotulo">Custos lançados</span><strong>{brl(investido - Number(equino.valor_aquisicao))}</strong></div>
-          <div><span className="rotulo">Custo médio</span><strong>{custos.length ? brl(custoMedio) : '—'}</strong></div>
-          <div><span className="rotulo">Total investido</span><strong>{brl(investido)}</strong></div>
-        </div></div>
-      </div>
-
-      <div className="cartao">
-        <div className="cabeca"><h2>Editar cadastro</h2></div>
         <div className="corpo">
-          <form action={atualizarEquino} className="linha">
-            <input type="hidden" name="id" value={id} />
-            <label className="larga">Nome<input name="nome" required defaultValue={equino.nome} /></label>
-            <label>Função<select name="funcao_reprodutiva" defaultValue={equino.funcao_reprodutiva}>{FUNCOES.map((x) => <option key={x}>{x}</option>)}</select></label>
-            <label>Nascimento<input name="nascimento" type="date" defaultValue={equino.nascimento ?? ''} /></label>
-            <label>Registro ABCCMM<input name="registro_abccmm" defaultValue={equino.registro_abccmm ?? ''} /></label>
-            <label>Status do registro<select name="status_registro" defaultValue={equino.status_registro}><option>Sem registro</option><option>Provisório</option><option>Definitivo</option></select></label>
-            <label>Microchip<input name="microchip" defaultValue={equino.microchip ?? ''} /></label>
-            <label>DNA<select name="dna_status" defaultValue={equino.dna_status}><option>Não realizado</option><option>Coletado</option><option>Em análise</option><option>Compatível</option><option>Incompatível</option></select></label>
-            <label>Pelagem<input name="pelagem" defaultValue={equino.pelagem ?? ''} /></label>
-            <label>Andamento<select name="andamento" defaultValue={equino.andamento}><option>Não avaliado</option><option>Marcha batida</option><option>Marcha picada</option></select></label>
-            <label>Pai cadastrado<select name="pai_id" defaultValue={equino.pai_id ?? ''}><option value="">Não vincular</option>{machos.map((e: any) => <option key={e.id} value={e.id}>{e.nome}</option>)}</select></label>
-            <label>Ou apenas o nome do pai<input name="pai_nome" defaultValue={equino.pai_nome ?? ''} placeholder="Nome e sufixo do garanhão" /></label>
-            <label>Mãe cadastrada<select name="mae_id" defaultValue={equino.mae_id ?? ''}><option value="">Não vincular</option>{femeas.map((e: any) => <option key={e.id} value={e.id}>{e.nome}</option>)}</select></label>
-            <label>Ou apenas o nome da mãe<input name="mae_nome" defaultValue={equino.mae_nome ?? ''} placeholder="Nome e sufixo da matriz" /></label>
-            <label>Criador<input name="criador" defaultValue={equino.criador ?? ''} /></label>
-            <label>Proprietário<input name="proprietario" defaultValue={equino.proprietario ?? ''} /></label>
-            <label>Localização<input name="localizacao" defaultValue={equino.localizacao ?? ''} /></label>
-            <label>Situação<select name="situacao" defaultValue={equino.situacao}><option>Ativo</option><option>Referência</option><option>Vendido</option><option>Transferido</option><option>Falecido</option></select></label>
-            <label>Data de aquisição<input name="data_aquisicao" type="date" defaultValue={equino.data_aquisicao ?? ''} /></label>
-            <label>Valor de aquisição<input name="valor_aquisicao" type="number" min="0" step="0.01" defaultValue={Number(equino.valor_aquisicao)} /></label>
-            <label className="larga">Observações<textarea name="observacoes" rows={3} defaultValue={equino.observacoes ?? ''} /></label>
-            <button>Salvar cadastro</button>
-          </form>
+          <dl className="dados">
+            {dado('Aquisição', `${brl(Number(equino.valor_aquisicao))}${equino.data_aquisicao ? ` em ${dia(equino.data_aquisicao)}` : ''}`)}
+            {dado('Custos lançados', `${brl(investido - Number(equino.valor_aquisicao))} em ${custos.length} lançamento${custos.length === 1 ? '' : 's'}`)}
+            {dado('Custo médio por lançamento', custos.length && brl(custoMedio))}
+            {dado('Total investido', brl(investido))}
+          </dl>
         </div>
       </div>
 
-      <div className="cartao"><div className="corpo"><details className="perigo-zona"><summary>Excluir este equino</summary><p className="aviso">Registros reprodutivos podem impedir a exclusão para preservar a genealogia.</p><form action={excluir}><input type="hidden" name="tabela" value="equinos" /><input type="hidden" name="id" value={id} /><input type="hidden" name="ir" value="/equinos" /><button className="perigo">Excluir {equino.nome}</button></form></details></div></div>
+      <div className="cartao">
+        <div className="corpo" style={{ paddingTop: 18 }}><details>
+          <summary>Editar cadastro</summary>
+          <form action={atualizarEquino} className="linha">
+            <input type="hidden" name="id" value={id} />
+            <CamposEquino e={equino} machos={machos} femeas={femeas} />
+            <button>Salvar cadastro</button>
+          </form>
+        </details></div>
+      </div>
+
+      <div className="cartao"><div className="corpo" style={{ paddingTop: 18 }}><details className="perigo-zona"><summary>Excluir este equino</summary><p className="aviso">Registros reprodutivos podem impedir a exclusão para preservar a genealogia.</p><form action={excluir}><input type="hidden" name="tabela" value="equinos" /><input type="hidden" name="id" value={id} /><input type="hidden" name="ir" value="/equinos" /><button className="perigo">Excluir {equino.nome}</button></form></details></div></div>
     </>
   )
 }

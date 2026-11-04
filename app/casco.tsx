@@ -5,7 +5,7 @@ import { cabecasAtivas } from '@/lib/campos'
 import { NavAcao, NavItem, NavLote } from './nav'
 import { sair } from './actions'
 
-/** Barra lateral + área de conteúdo. Usada por /lotes e /racao. */
+/** Barra lateral + área de conteúdo, usada por todas as telas internas. */
 export default async function Casco({ children }: { children: React.ReactNode }) {
   const sb = await db()
   // o middleware já validou o JWT nesta requisição; aqui só lemos o e-mail dele
@@ -24,17 +24,17 @@ export default async function Casco({ children }: { children: React.ReactNode })
         </Link>
 
         <div className="lotes-nav">
-          <p className="rotulo">Lotes</p>
+          <p className="rotulo">Gado</p>
           {lotes.map((l: any) => (
             <NavLote key={l.id} href={`/lotes/${l.id}`} nome={l.nome} cabecas={cabecasAtivas(l.quantidade, l.saidas ?? [])} />
           ))}
           <NavAcao href="/lotes/novo">Cadastrar lote</NavAcao>
 
-          <p className="rotulo">Equinos</p>
-          <NavItem href="/equinos" prefixo>
-            Cavalos · {equinos.filter((e: any) => e.situacao === 'Ativo').length}
+          <p className="rotulo">Cavalos</p>
+          <NavItem href="/equinos" prefixo conta={equinos.filter((e: any) => e.situacao === 'Ativo').length}>
+            Plantel
           </NavItem>
-          <NavItem href="/equinos/custos">Custos dos equinos</NavItem>
+          <NavItem href="/equinos/custos">Custos do plantel</NavItem>
 
           <p className="rotulo">Ração</p>
           <NavItem href="/racao">Formulações</NavItem>

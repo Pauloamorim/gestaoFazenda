@@ -55,19 +55,21 @@ export default async function Reproducao({ params }: { params: Promise<{ id: str
         {!reproducoes.length ? (
           <Vazio titulo="Nenhum ciclo reprodutivo." dica="Registre a cobertura, inseminação ou transferência acima." />
         ) : reproducoes.map((r: any) => (
-          <div className="corpo" key={r.id} style={{ borderBottom: '1px solid var(--linha)' }}>
-            <div className="comparativo">
-              <div><span className="rotulo">Estação</span><strong>{r.estacao}</strong></div>
-              <div><span className="rotulo">Matriz</span><strong>{nomes.get(r.matriz_id) ?? '—'}</strong></div>
-              <div><span className="rotulo">Garanhão</span><strong>{(r.garanhao_id ? nomes.get(r.garanhao_id) : r.garanhao_nome) ?? '—'}</strong></div>
-              <div><span className="rotulo">Receptora</span><strong>{r.receptora_id ? nomes.get(r.receptora_id) ?? '—' : '—'}</strong></div>
-              <div><span className="rotulo">Método</span><strong>{r.metodo}</strong></div>
-              <div><span className="rotulo">Status</span><strong>{r.status}</strong></div>
-              <div><span className="rotulo">Previsão</span><strong>{r.previsao_parto ? dia(r.previsao_parto) : '—'}</strong></div>
+          <div className="ciclo" key={r.id}>
+            <div className="ciclo-topo">
+              <h3>Estação {r.estacao} — {r.metodo}</h3>
+              <span className={['Vazia', 'Embrião não recuperado', 'Perda gestacional', 'Cancelada'].includes(r.status) ? 'etiqueta alerta' : r.status === 'Prenhez confirmada' || r.status === 'Parto realizado' ? 'etiqueta g-custo' : 'etiqueta'}>{r.status}</span>
             </div>
+            <dl className="dados">
+              <div><dt>Matriz</dt><dd>{nomes.get(r.matriz_id) ?? '—'}</dd></div>
+              <div><dt>Garanhão</dt><dd>{(r.garanhao_id ? nomes.get(r.garanhao_id) : r.garanhao_nome) ?? '—'}</dd></div>
+              <div><dt>Receptora</dt>{r.receptora_id ? <dd>{nomes.get(r.receptora_id) ?? '—'}</dd> : <dd className="vazio-dado">Sem receptora</dd>}</div>
+              <div><dt>{r.data_parto ? 'Parto' : 'Previsão de parto'}</dt>{r.data_parto || r.previsao_parto ? <dd>{dia(r.data_parto ?? r.previsao_parto)}</dd> : <dd className="vazio-dado">Não informada</dd>}</div>
+            </dl>
+            {r.observacoes && <p className="sub" style={{ marginTop: 12 }}>{r.observacoes}</p>}
 
             {r.status !== 'Parto realizado' && (
-              <form action={atualizarReproducaoEquina} className="linha" style={{ marginTop: 14 }}>
+              <form action={atualizarReproducaoEquina} className="linha" style={{ marginTop: 18 }}>
                 <input type="hidden" name="id" value={r.id} />
                 <input type="hidden" name="equino_id" value={id} />
                 <label>Status<select name="status" defaultValue={r.status}>{STATUS.map((x) => <option key={x}>{x}</option>)}</select></label>
@@ -92,8 +94,8 @@ export default async function Reproducao({ params }: { params: Promise<{ id: str
               </details>
             )}
 
-            {r.potro_id && <p className="sub" style={{ marginTop: 12 }}>Produto: <a href={`/equinos/${r.potro_id}`}>{nomes.get(r.potro_id) ?? 'abrir ficha'}</a>{r.data_parto ? ` · ${dia(r.data_parto)}` : ''}</p>}
-            {!r.potro_id && <div style={{ marginTop: 10 }}><Excluir id={r.id} tabela="reproducoes_equinas" revalidar={`/equinos/${id}`} /></div>}
+            {r.potro_id && <p className="sub" style={{ marginTop: 14 }}>Produto: <a href={`/equinos/${r.potro_id}`}>{nomes.get(r.potro_id) ?? 'abrir ficha'}</a></p>}
+            {!r.potro_id && <div style={{ marginTop: 10, display: 'flex', alignItems: 'center', gap: 6 }}><span className="rotulo">Excluir ciclo</span><Excluir id={r.id} tabela="reproducoes_equinas" revalidar={`/equinos/${id}`} /></div>}
           </div>
         ))}
       </div>

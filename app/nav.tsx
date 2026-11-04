@@ -26,12 +26,13 @@ export function Aba({ href, children }: { href: string; children: React.ReactNod
   )
 }
 
-export function NavItem({ href, children, prefixo = false }: { href: string; children: React.ReactNode; prefixo?: boolean }) {
+export function NavItem({ href, children, prefixo = false, conta }: { href: string; children: React.ReactNode; prefixo?: boolean; conta?: number }) {
   const caminho = usePathname()
   const ativo = caminho === href || (prefixo && caminho.startsWith(`${href}/`) && caminho !== '/equinos/novo' && caminho !== '/equinos/custos')
   return (
     <Link href={href} className={ativo ? 'lote-link ativo' : 'lote-link'} {...aoPassar}>
       <span>{children}</span>
+      {conta !== undefined && <em>{conta}</em>}
     </Link>
   )
 }
