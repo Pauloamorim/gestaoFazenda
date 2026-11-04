@@ -40,6 +40,11 @@ export default async function Casco({ children }: { children: React.ReactNode })
           <NavItem href="/racao">Formulações</NavItem>
           <NavItem href="/racao/ingredientes">Ingredientes</NavItem>
 
+          <p className="rotulo">Silagem</p>
+          <NavItem href="/silagem">Estoque e produção</NavItem>
+          <NavItem href="/silagem/custos">Custos da silagem</NavItem>
+          <NavItem href="/silagem/cadastros">Áreas e depósitos</NavItem>
+
           <p className="rotulo">Mercado</p>
           <NavItem href="/cotacoes">Cotações</NavItem>
         </div>

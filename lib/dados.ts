@@ -367,3 +367,45 @@ export const carregarEquino = cache(async (id: string) =>
 export const totalEquino = (e: any) =>
   Number(e.valor_aquisicao) +
   (e.custos_equinos ?? []).reduce((s: number, c: any) => s + Number(c.valor), 0)
+
+// --- silagem ---
+
+export const listarAreasSilagem = cache(async () =>
+  medir('listarAreasSilagem', async () => {
+    const sb = await db()
+    return ok(await sb.from('silagem_areas').select('*').order('nome'))
+  }),
+)
+
+export const listarDepositosSilagem = cache(async () =>
+  medir('listarDepositosSilagem', async () => {
+    const sb = await db()
+    return ok(await sb.from('silagem_depositos').select('*').order('nome'))
+  }),
+)
+
+export const listarMovimentosSilagem = cache(async () =>
+  medir('listarMovimentosSilagem', async () => {
+    const sb = await db()
+    return ok(
+      await sb
+        .from('silagem_movimentos')
+        .select('*, silagem_areas(nome), silagem_depositos(nome)')
+        .order('data', { ascending: false })
+        .order('criado_em', { ascending: false }),
+    )
+  }),
+)
+
+export const listarCustosSilagem = cache(async () =>
+  medir('listarCustosSilagem', async () => {
+    const sb = await db()
+    return ok(
+      await sb
+        .from('silagem_custos')
+        .select('*, silagem_areas(nome)')
+        .order('data', { ascending: false })
+        .order('criado_em', { ascending: false }),
+    )
+  }),
+)

@@ -36,7 +36,7 @@ export function Excluir({
   )
 }
 
-export function Vazio({ titulo, dica }: { titulo: string; dica: string }) {
+export function Vazio({ titulo, dica }: { titulo: string; dica: React.ReactNode }) {
   return (
     <p className="vazio">
       <strong>{titulo}</strong>

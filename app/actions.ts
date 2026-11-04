@@ -6,6 +6,7 @@ import { db, ok } from '@/lib/supabase'
 import { numero, numeroObrigatorio, obrigatorio, texto } from '@/lib/campos'
 import { CATEGORIAS, FONTE, interpretarCotacoes } from '@/lib/cotacoes'
 import { distribuirCustoEquino } from '@/lib/equinos'
+import { saldoPorDeposito } from '@/lib/silagem'
 
 // --- conta ---
 
@@ -675,6 +676,95 @@ export async function excluirFotoEquino(fd: FormData) {
   revalidatePath(`/equinos/${equino_id}`, 'layout')
 }
 
+// --- silagem ---
+
+const areaSilagem = (fd: FormData) => ({
+  nome: obrigatorio(fd.get('nome'), 'Nome da área'),
+  cultura: obrigatorio(fd.get('cultura'), 'Cultura'),
+  tamanho_ha: numero(fd.get('tamanho_ha'), 'Tamanho'),
+  observacoes: texto(fd.get('observacoes')),
+})
+
+const depositoSilagem = (fd: FormData) => ({
+  nome: obrigatorio(fd.get('nome'), 'Nome do depósito'),
+  observacoes: texto(fd.get('observacoes')),
+})
+
+export async function criarAreaSilagem(fd: FormData) {
+  const sb = await db()
+  ok(await sb.from('silagem_areas').insert(areaSilagem(fd)))
+  revalidatePath('/silagem', 'layout')
+}
+
+export async function atualizarAreaSilagem(fd: FormData) {
+  const sb = await db()
+  ok(await sb.from('silagem_areas').update(areaSilagem(fd)).eq('id', obrigatorio(fd.get('id'), 'id')))
+  revalidatePath('/silagem', 'layout')
+}
+
+export async function criarDepositoSilagem(fd: FormData) {
+  const sb = await db()
+  ok(await sb.from('silagem_depositos').insert(depositoSilagem(fd)))
+  revalidatePath('/silagem', 'layout')
+}
+
+export async function atualizarDepositoSilagem(fd: FormData) {
+  const sb = await db()
+  ok(await sb.from('silagem_depositos').update(depositoSilagem(fd)).eq('id', obrigatorio(fd.get('id'), 'id')))
+  revalidatePath('/silagem', 'layout')
+}
+
+export async function registrarProducaoSilagem(fd: FormData) {
+  const sb = await db()
+  ok(
+    await sb.from('silagem_movimentos').insert({
+      tipo: 'producao',
+      data: obrigatorio(fd.get('data'), 'Data'),
+      sacos: numeroObrigatorio(fd.get('sacos'), 'Sacos'),
+      area_id: obrigatorio(fd.get('area_id'), 'Área'),
+      deposito_id: obrigatorio(fd.get('deposito_id'), 'Depósito'),
+      observacoes: texto(fd.get('observacoes')),
+    }),
+  )
+  revalidatePath('/silagem', 'layout')
+}
+
+export async function registrarUsoSilagem(fd: FormData) {
+  const deposito_id = obrigatorio(fd.get('deposito_id'), 'Depósito')
+  const sacos = numeroObrigatorio(fd.get('sacos'), 'Sacos')
+  const sb = await db()
+  // ponytail: confere o saldo antes de gravar; dois usos no mesmo segundo podem passar juntos
+  const movimentos = ok(
+    await sb.from('silagem_movimentos').select('tipo, sacos, deposito_id, area_id, data').eq('deposito_id', deposito_id),
+  )
+  const saldo = saldoPorDeposito(movimentos).get(deposito_id) ?? 0
+  if (sacos > saldo) throw new Error(`Este depósito tem só ${saldo} saco(s). Não dá para usar ${sacos}.`)
+  ok(
+    await sb.from('silagem_movimentos').insert({
+      tipo: 'uso',
+      data: obrigatorio(fd.get('data'), 'Data'),
+      sacos,
+      deposito_id,
+      observacoes: texto(fd.get('observacoes')),
+    }),
+  )
+  revalidatePath('/silagem', 'layout')
+}
+
+export async function criarCustoSilagem(fd: FormData) {
+  const sb = await db()
+  ok(
+    await sb.from('silagem_custos').insert({
+      area_id: texto(fd.get('area_id')),
+      categoria: obrigatorio(fd.get('categoria'), 'Categoria'),
+      descricao: texto(fd.get('descricao')),
+      data: obrigatorio(fd.get('data'), 'Data'),
+      valor: numeroObrigatorio(fd.get('valor'), 'Valor'),
+    }),
+  )
+  revalidatePath('/silagem', 'layout')
+}
+
 const TABELAS = [
   'lotes',
   'animais',
@@ -690,6 +780,10 @@ const TABELAS = [
   'reproducoes_equinas',
   'eventos_equinos',
   'custos_equinos',
+  'silagem_areas',
+  'silagem_depositos',
+  'silagem_movimentos',
+  'silagem_custos',
 ] as const
 
 export async function excluir(fd: FormData) {
@@ -708,6 +802,31 @@ export async function excluir(fd: FormData) {
       throw new Error(
         `Este ingrediente está em ${count} formulação(ões). Tire ele de lá antes de excluir.`,
       )
+  }
+
+  if (tabela === 'silagem_areas' || tabela === 'silagem_depositos') {
+    const coluna = tabela === 'silagem_areas' ? 'area_id' : 'deposito_id'
+    const [{ count: movimentos }, { count: custos }] = await Promise.all([
+      sb.from('silagem_movimentos').select('id', { count: 'exact', head: true }).eq(coluna, id),
+      tabela === 'silagem_areas'
+        ? sb.from('silagem_custos').select('id', { count: 'exact', head: true }).eq('area_id', id)
+        : Promise.resolve({ count: 0 }),
+    ])
+    if (movimentos || custos)
+      throw new Error('Este cadastro tem lançamentos de silagem. Exclua os lançamentos antes.')
+  }
+
+  // apagar uma entrada já consumida deixaria o depósito com saldo negativo
+  if (tabela === 'silagem_movimentos') {
+    const m = ok(await sb.from('silagem_movimentos').select('tipo, sacos, deposito_id').eq('id', id).single())
+    if (m.tipo !== 'uso') {
+      const todos = ok(
+        await sb.from('silagem_movimentos').select('tipo, sacos, deposito_id, area_id, data').eq('deposito_id', m.deposito_id),
+      )
+      const saldo = saldoPorDeposito(todos).get(m.deposito_id) ?? 0
+      if (saldo < m.sacos)
+        throw new Error(`Esses ${m.sacos} sacos já foram usados (saldo do depósito: ${saldo}). Exclua o uso antes.`)
+    }
   }
 
   ok(await sb.from(tabela).delete().eq('id', id))
