@@ -1226,9 +1226,20 @@ a.arquivo::before {
 
 /* ---------- telas estreitas (celular no curral) ---------- */
 
+@media (min-width: 901px) {
+  .so-celular {
+    display: none !important;
+  }
+}
 @media (max-width: 900px) {
   .app {
     grid-template-columns: minmax(0, 1fr);
+    /* sem isso a linha do menu estica para preencher a tela em páginas curtas */
+    grid-template-rows: auto 1fr;
+  }
+  /* lotes ficam na página Rebanho; aqui só as seções */
+  .nav-lote {
+    display: none;
   }
   .casco {
     min-width: 0;

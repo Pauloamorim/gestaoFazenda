@@ -25,6 +25,7 @@ export default async function Casco({ children }: { children: React.ReactNode })
 
         <div className="lotes-nav">
           <p className="rotulo">Gado</p>
+          <NavItem href="/lotes" prefixo className="so-celular">Rebanho</NavItem>
           {lotes.map((l: any) => (
             <NavLote key={l.id} href={`/lotes/${l.id}`} nome={l.nome} cabecas={cabecasAtivas(l.quantidade, l.saidas ?? [])} />
           ))}

@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useEffect, useRef } from 'react'
 
 /** Passar o mouse já busca a página inteira; o clique só troca a tela.
  *  Sem isso o Next só pré-busca o esqueleto e a consulta ao banco fica no clique. */
@@ -10,7 +11,7 @@ const aoPassar = { prefetch: true as const, unstable_dynamicOnHover: true }
 export function NavLote({ href, nome, cabecas }: { href: string; nome: string; cabecas: number }) {
   const ativo = usePathname().startsWith(href)
   return (
-    <Link href={href} className={ativo ? 'lote-link ativo' : 'lote-link'} {...aoPassar}>
+    <Link href={href} className={ativo ? 'lote-link nav-lote ativo' : 'lote-link nav-lote'} {...aoPassar}>
       <span>{nome}</span>
       <em>{cabecas}</em>
     </Link>
@@ -26,11 +27,16 @@ export function Aba({ href, children }: { href: string; children: React.ReactNod
   )
 }
 
-export function NavItem({ href, children, prefixo = false, conta }: { href: string; children: React.ReactNode; prefixo?: boolean; conta?: number }) {
+export function NavItem({ href, children, prefixo = false, conta, className = '' }: { href: string; children: React.ReactNode; prefixo?: boolean; conta?: number; className?: string }) {
   const caminho = usePathname()
-  const ativo = caminho === href || (prefixo && caminho.startsWith(`${href}/`) && caminho !== '/equinos/novo' && caminho !== '/equinos/custos')
+  const ativo = caminho === href || (prefixo && caminho.startsWith(`${href}/`) && caminho !== '/equinos/novo' && caminho !== '/equinos/custos' && caminho !== '/lotes/novo')
+  const ref = useRef<HTMLAnchorElement>(null)
+  // no celular o menu é uma faixa que rola de lado: traz o item da tela atual para a vista
+  useEffect(() => {
+    if (ativo && matchMedia('(max-width: 900px)').matches) ref.current?.scrollIntoView({ inline: 'center', block: 'nearest' })
+  }, [ativo])
   return (
-    <Link href={href} className={ativo ? 'lote-link ativo' : 'lote-link'} {...aoPassar}>
+    <Link ref={ref} href={href} className={`lote-link ${ativo ? 'ativo' : ''} ${className}`} {...aoPassar}>
       <span>{children}</span>
       {conta !== undefined && <em>{conta}</em>}
     </Link>
