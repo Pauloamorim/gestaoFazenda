@@ -4,6 +4,7 @@ import { listarAreasSilagem, listarDepositosSilagem, listarInsumosSilagem, lista
 import { custoDoSaco, saldoPorDeposito } from '@/lib/silagem'
 import { registrarProducaoSilagem, registrarUsoSilagem } from '../actions'
 import { Excluir, Vazio } from '../componentes'
+import { LinkTabela } from '../nav'
 
 const TIPO = { producao: 'Produção', uso: 'Uso', saldo_inicial: 'Saldo inicial' } as Record<string, string>
 
@@ -102,13 +103,13 @@ export default async function Silagem() {
       )}
 
       <div className="cartao">
-        <div className="cabeca"><h2>Lançamentos</h2></div>
+        <div className="cabeca"><h2>Lançamentos</h2><p className="sub" style={{ marginTop: -6 }}>Clique na data para editar.</p></div>
         {!movimentos.length ? (
           <Vazio titulo="Nenhum lançamento ainda." dica="Produção e uso de sacos aparecem aqui, do mais recente para o mais antigo." />
         ) : (
           <table><thead><tr><th>Data</th><th>Tipo</th><th>Área</th><th>Depósito</th><th>Observações</th><th className="num">Sacos</th><th className="acao"></th></tr></thead><tbody>
             {movimentos.map((m: any) => <tr key={m.id}>
-              <td>{dia(m.data)}</td>
+              <td><LinkTabela href={`/silagem/lancamentos/${m.id}`}>{dia(m.data)}</LinkTabela></td>
               <td><span className={m.tipo === 'uso' ? 'etiqueta alerta' : 'etiqueta'}>{TIPO[m.tipo]}</span></td>
               <td>{m.silagem_areas?.nome ?? '—'}</td>
               <td>{m.silagem_depositos?.nome}</td>

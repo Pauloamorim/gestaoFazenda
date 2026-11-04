@@ -751,6 +751,33 @@ export async function registrarUsoSilagem(fd: FormData) {
   revalidatePath('/silagem', 'layout')
 }
 
+export async function atualizarMovimentoSilagem(fd: FormData) {
+  const id = obrigatorio(fd.get('id'), 'id')
+  const sb = await db()
+  const antes = ok(await sb.from('silagem_movimentos').select('tipo, deposito_id').eq('id', id).single())
+  const novo = {
+    data: obrigatorio(fd.get('data'), 'Data'),
+    sacos: numeroObrigatorio(fd.get('sacos'), 'Sacos'),
+    deposito_id: obrigatorio(fd.get('deposito_id'), 'Depósito'),
+    area_id: antes.tipo === 'producao' ? obrigatorio(fd.get('area_id'), 'Área') : null,
+    observacoes: texto(fd.get('observacoes')),
+  }
+
+  // a edição não pode deixar nenhum dos depósitos envolvidos com saldo negativo
+  const depositos = [...new Set([antes.deposito_id, novo.deposito_id])]
+  const movimentos = ok(
+    await sb.from('silagem_movimentos').select('id, tipo, sacos, deposito_id, area_id, data').in('deposito_id', depositos),
+  )
+  const saldo = saldoPorDeposito(movimentos.map((m: any) => (m.id === id ? { ...m, ...novo } : m)))
+  for (const d of depositos)
+    if ((saldo.get(d) ?? 0) < 0)
+      throw new Error(`Com essa mudança um depósito ficaria com ${saldo.get(d)} sacos. Ajuste os usos antes.`)
+
+  ok(await sb.from('silagem_movimentos').update(novo).eq('id', id))
+  revalidatePath('/silagem', 'layout')
+  redirect('/silagem')
+}
+
 const insumoSilagem = (fd: FormData) => ({
   nome: obrigatorio(fd.get('nome'), 'Insumo'),
   unidade: obrigatorio(fd.get('unidade'), 'Unidade'),
