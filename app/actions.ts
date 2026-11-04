@@ -754,8 +754,7 @@ export async function registrarUsoSilagem(fd: FormData) {
 const insumoSilagem = (fd: FormData) => ({
   nome: obrigatorio(fd.get('nome'), 'Insumo'),
   unidade: obrigatorio(fd.get('unidade'), 'Unidade'),
-  qtd_comprada: numeroObrigatorio(fd.get('qtd_comprada'), 'Quantidade comprada'),
-  valor_pago: numeroObrigatorio(fd.get('valor_pago'), 'Valor pago'),
+  preco_unitario: numeroObrigatorio(fd.get('preco_unitario'), 'Preço por unidade'),
   qtd_por_saco: numeroObrigatorio(fd.get('qtd_por_saco'), 'Quantidade por saco'),
 })
 

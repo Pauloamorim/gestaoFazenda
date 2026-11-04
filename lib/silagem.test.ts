@@ -21,9 +21,9 @@ test('saldoPorDeposito soma entradas e desconta uso por depósito', () => {
 })
 
 test('custoDoSaco soma o que cada insumo põe em um saco', () => {
-  const milho = { qtd_comprada: 60, valor_pago: 90, qtd_por_saco: 2 } // R$ 1,50/kg × 2 kg
-  const saco = { qtd_comprada: '100', valor_pago: '45', qtd_por_saco: '1' } // R$ 0,45 cada
-  assert.equal(custoNoSaco(milho), 3)
-  assert.equal(custoDoSaco([milho, saco]), 3.45)
+  const milho = { preco_unitario: 2, qtd_por_saco: 1 } // R$ 2,00/kg × 1 kg
+  const saco = { preco_unitario: '0.45', qtd_por_saco: '1' } // R$ 0,45 cada
+  assert.equal(custoNoSaco(milho), 2)
+  assert.equal(custoDoSaco([milho, saco]), 2.45)
   assert.equal(custoDoSaco([]), 0)
 })

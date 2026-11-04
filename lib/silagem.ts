@@ -10,9 +10,9 @@ export function saldoPorDeposito(movimentos: Movimento[]) {
   return saldo
 }
 
-type Insumo = { qtd_comprada: number | string; valor_pago: number | string; qtd_por_saco: number | string }
+type Insumo = { preco_unitario: number | string; qtd_por_saco: number | string }
 
-/** Quanto deste insumo vai em um saco, em reais: preço pago por unidade × quantidade por saco. */
-export const custoNoSaco = (i: Insumo) => (Number(i.valor_pago) / Number(i.qtd_comprada)) * Number(i.qtd_por_saco)
+/** Quanto deste insumo vai em um saco, em reais: preço da unidade × quantidade por saco. */
+export const custoNoSaco = (i: Insumo) => Number(i.preco_unitario) * Number(i.qtd_por_saco)
 
 export const custoDoSaco = (insumos: Insumo[]) => insumos.reduce((s, i) => s + custoNoSaco(i), 0)

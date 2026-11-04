@@ -11,9 +11,8 @@ function CamposInsumo({ i }: { i?: any }) {
     <>
       <label>Insumo<input name="nome" required defaultValue={i?.nome} placeholder="Milho" /></label>
       <label>Unidade<input name="unidade" required defaultValue={i?.unidade} placeholder="kg, un, m" /></label>
-      <label>Qtd. comprada<input name="qtd_comprada" type="number" min="0.001" step="0.001" required defaultValue={i?.qtd_comprada} placeholder="60" /></label>
-      <label>Valor pago (R$)<input name="valor_pago" type="number" min="0" step="0.01" required defaultValue={i?.valor_pago} placeholder="90,00" /></label>
-      <label>Qtd. por saco<input name="qtd_por_saco" type="number" min="0.001" step="0.001" required defaultValue={i?.qtd_por_saco} placeholder="2" /></label>
+      <label>Preço por unidade (R$)<input name="preco_unitario" type="number" min="0" step="0.0001" required defaultValue={i?.preco_unitario} placeholder="2,00" /></label>
+      <label>Qtd. por saco<input name="qtd_por_saco" type="number" min="0.001" step="0.001" required defaultValue={i?.qtd_por_saco} placeholder="1" /></label>
     </>
   )
 }
@@ -26,7 +25,7 @@ export default async function CustoDoSaco() {
     <>
       <h1>Custo do saco</h1>
       <p className="sub">
-        Tudo o que vai em um saco de silagem: milho, o saco, o amarrilho. Informe o que pagou, quanto veio
+        Tudo o que vai em um saco de silagem: milho, o saco, o amarrilho. Informe o preço de cada unidade
         e quanto vai em cada saco. Mudou o preço, é só editar.
       </p>
 
@@ -50,12 +49,12 @@ export default async function CustoDoSaco() {
         {!insumos.length ? (
           <Vazio titulo="Nenhum insumo ainda." dica="Adicione milho, saco, amarrilho e o que mais entra em cada saco." />
         ) : (
-          <table><thead><tr><th>Insumo</th><th className="num">Preço pago</th><th className="num">Por saco</th><th className="num">Custo no saco</th><th className="num">%</th></tr></thead><tbody>
+          <table><thead><tr><th>Insumo</th><th className="num">Preço</th><th className="num">Por saco</th><th className="num">Custo no saco</th><th className="num">%</th></tr></thead><tbody>
             {insumos.map((i: any) => {
               const c = custoNoSaco(i)
               return <tr key={i.id}>
                 <td>{i.nome}</td>
-                <td className="num">{brl(Number(i.valor_pago) / Number(i.qtd_comprada))}/{i.unidade}</td>
+                <td className="num">{brl(Number(i.preco_unitario))}/{i.unidade}</td>
                 <td className="num">{n(i.qtd_por_saco)} {i.unidade}</td>
                 <td className="num">{brl(c)}</td>
                 <td className="num">{total ? ((c / total) * 100).toFixed(0) : 0}%</td>
